@@ -2,8 +2,45 @@ import requests
 import jinja2
 import json
 
-headers = {'Version': '2'}
-x = requests.get('https://api.justjoin.it/v2/user-panel/offers?&page=1&sortBy=published&orderBy=DESC&perPage=100', headers=headers)
-offers = json.dumps(x.json(), indent=4)
-with open("offers.json", "w") as outfile:
-    outfile.write(offers)
+categories = {
+    "1": "JavaScript",
+    "2": "HTML",
+    "3": "PHP",
+    "4": "Ruby",
+    "5": "Python",
+    "6": "Java",
+    "7": ".NET",
+    "8": "Scala",
+    "9": "C",
+    "10": "Mobile",
+    "11": "Testing",
+    "12": "DevOps",
+    "13": "Admin",
+    "14": "UX-UI",
+    "15": "PM",
+    "16": "Game",
+    "17": "Analytics",
+    "18": "Security",
+    "19": "Data",
+    "20": "Go",
+    "21": "Support",
+    "22": "ERP",
+    "23": "Architecture",
+    "24": "Other"
+}
+
+for key,value in categories.items():
+    offers = []
+    headers = {'Version': '2'}
+    page = 1
+    x = requests.get(f'https://api.justjoin.it/v2/user-panel/offers?categories[]={key}&page=1&sortBy=published&orderBy=DESC&perPage=100', headers=headers)
+    assert x.status_code == 200, f"Status Code should be 200, but is {x.status_code}"
+    x = x.json()
+    while page <= x['meta']['totalPages']:
+        x = requests.get(f'https://api.justjoin.it/v2/user-panel/offers?categories[]={key}&page={page}&sortBy=published&orderBy=DESC&perPage=100', headers=headers)
+        assert x.status_code == 200, f"Status Code should be 200, but is {x.status_code}"
+        x =x.json()
+        page = x['meta']['page'] + 1
+        offers.append(x)
+    with open(f"offers_{value}.json", "w") as outfile:
+        offers_json = json.dump(offers, outfile, indent=4)
