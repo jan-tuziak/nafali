@@ -1,6 +1,11 @@
 import requests
 import json
-import os
+import matplotlib.pyplot as plt
+import collections
+
+def save_to_json_file(data, filename):
+    with open(filename, "w") as outfile:
+        json.dump(data, outfile, indent=4)
 
 categories = {
     "1": "JavaScript",
@@ -29,9 +34,9 @@ categories = {
     "24": "Other"
 }
 
+# EXTRACT - create offers jsons
+offers = []
 for key,value in categories.items():
-    # EXTRACT - create offers jsons
-    offers = []
     headers = {'Version': '2'}
     page = 1
     x = requests.get(f'https://api.justjoin.it/v2/user-panel/offers?categories[]={key}&page=1&sortBy=published&orderBy=DESC&perPage=100', headers=headers)
@@ -43,13 +48,25 @@ for key,value in categories.items():
         x =x.json()
         page = x['meta']['page'] + 1
         offers = offers + x['data']
-        
-    filename = f"offers/{value}.json"
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
-    with open(filename, "w") as outfile:
-        offers_json = json.dump(offers, outfile, indent=4)
     
-    # LOAD - convert jsons into a csv ready for Pandas or Matplotlib
+num_of_all_offers = len(offers)
+offers = list(filter(lambda offer: offer['employmentTypes'][0]['to'] is not None, offers))
+num_of_offers_with_salary = len(offers)
 
+print(f"In justjoin.it there are {num_of_all_offers} offers.")
+print(f"Of which {num_of_offers_with_salary} offers have salary.")
+print(f"That is {num_of_offers_with_salary/num_of_all_offers:.0%}.")
+    
+save_to_json_file(offers, "offers.json")
+    
+# TANSFORM - convert jsons into a dataframe ready for Pandas or Matplotlib
+skills = []
+for offer in offers:
+    salary = offer['employmentTypes'][0]
+    for req_skill in offer['requiredSkills']:
+        skills.append({'name': req_skill, 'categoryId': offer['categoryId'], 'salary_from':salary['from'], 'salary_to':salary['to']})
 
-
+print(f'{len(skills)} instances of skills saved.')
+save_to_json_file(skills, "skills.json")
+unique_counts = collections.Counter(s['name'] for s in skills)
+print(f'There are {len(unique_counts)} unique skills.')
