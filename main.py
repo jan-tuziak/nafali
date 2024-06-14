@@ -1,6 +1,6 @@
 import requests
-import jinja2
 import json
+import os
 
 categories = {
     "1": "JavaScript",
@@ -30,6 +30,7 @@ categories = {
 }
 
 for key,value in categories.items():
+    # EXTRACT - create offers jsons
     offers = []
     headers = {'Version': '2'}
     page = 1
@@ -41,6 +42,14 @@ for key,value in categories.items():
         assert x.status_code == 200, f"Status Code should be 200, but is {x.status_code}"
         x =x.json()
         page = x['meta']['page'] + 1
-        offers.append(x)
-    with open(f"offers_{value}.json", "w") as outfile:
+        offers = offers + x['data']
+        
+    filename = f"offers/{value}.json"
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    with open(filename, "w") as outfile:
         offers_json = json.dump(offers, outfile, indent=4)
+    
+    # LOAD - convert jsons into a csv ready for Pandas or Matplotlib
+
+
+
