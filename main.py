@@ -68,5 +68,5 @@ for offer in offers:
 
 print(f'{len(skills)} instances of skills saved.')
 save_to_json_file(skills, "skills.json")
-unique_counts = collections.Counter(s['name'] for s in skills)
-print(f'There are {len(unique_counts)} unique skills.')
+skills_counts = collections.Counter(s['name'] for s in skills)
+print(f'There are {len(skills_counts)} unique skills.')
