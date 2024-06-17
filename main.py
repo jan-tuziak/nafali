@@ -77,7 +77,7 @@ print(f'{len(skills)} instances of skills saved.')
 save_to_json_file(skills, "skills.json")
 skills_counts = collections.Counter(s['name'] for s in skills)
 print(f'There are {len(skills_counts)} unique skills.')
-popular_skills = {k: v for k, v in skills_counts.items() if v > 50}
+popular_skills = {k: v for k, v in skills_counts.items() if v > 20}
 print(popular_skills)
 print(len(skills_counts))
 print(len(popular_skills))
@@ -94,6 +94,19 @@ for k,v in popular_skills.items():
         data = list(range(start, stop, delta))
         popular_skills[k].extend(data)
 
-print(len(popular_skills['Azure DevOps']))
-plt.boxplot(popular_skills['Azure DevOps'])
+data = []
+labels = []
+for k,v in  popular_skills.items():
+    data.append(v)
+    labels.append(k)
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+
+bp = ax.boxplot(data, patch_artist = True, notch ='True')
+
+ax.set_xticklabels(labels)
+ax.get_yaxis().tick_left()
+ax.get_xaxis().tick_bottom()
+ax.tick_params(axis='x', labelrotation=90)
 plt.show()
